@@ -12,12 +12,16 @@ interface IProps {
   label?: keyof Option<T>;
   placeholder?: string;
   isLoading?: boolean;
+  selectClass?: null | string;
+  isSearchable?: boolean;
 }
 
 const props = withDefaults(defineProps<IProps>(), {
   label: "label",
   placeholder: "انتخاب کنید",
   isLoading: false,
+  selectClass: null,
+  isSearchable: true,
 });
 
 const model = defineModel<unknown>();
@@ -73,11 +77,13 @@ function handleSearch(searchTerm: string | null) {
       v-if="props.options"
       v-model="model"
       dir="rtl"
-      class="rounded-full [&_*]:!custom-scrollbar [--vs-border-radius:30px] [--vs-input-bg:transparent] [--vs-option-focused-color:transparent] [--vs-option-selected-color:#EA5348] [--vs-border:1px_solid_#000] [--vs-input-outline:unset]"
+      class="rounded-full [&_*]:!custom-scrollbar [--vs-border-radius:30px] [--vs-input-bg:transparent] [--vs-option-selected-color:#EA5348] [--vs-border:1px_solid_#000] dark:[--vs-border:1px_solid_#fff] [--vs-input-outline:unset] dark:[--vs-input-placeholder-color:#9a9da1] dark:[--vs-text-color:#fff] dark:[--vs-icon-color:#fff]"
+      :class="props.selectClass"
       :options="props.options"
       :get-option-label="(option) => `${option[props.label]}`"
       :placeholder="props.placeholder"
       :is-loading="props.isLoading"
+      :is-searchable="props.isSearchable"
       @search="handleSearch"
       @option-deselected="handleSearch(null)"
     >
@@ -86,6 +92,12 @@ function handleSearch(searchTerm: string | null) {
           {{ option.value }}
         </slot>
       </template>
+      <template v-if="$slots.option" #option="{ option }">
+        <slot name="option" :item="option">
+          {{ option.label }}
+        </slot>
+      </template>
+      <template #no-options> هیچ موردی یافت نشد. </template>
     </VueSelect>
   </div>
 </template>
@@ -108,5 +120,11 @@ function handleSearch(searchTerm: string | null) {
 }
 .vue-select :deep(.single-value) {
   white-space: nowrap;
+}
+.dark .vue-select :deep(.clear-button) {
+  color: #fff;
+}
+.dark .vue-select :deep(.dropdown-icon) {
+  color: #fff;
 }
 </style>
